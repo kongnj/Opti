@@ -1,15 +1,25 @@
 "a fffrrr" + """ b
-c """ + """ f """
+c """ + """ f """  \
+
+# 1223ddd\
+
+\
+\
+\
+
+'a' \
+'b'
+"\'" \
 
 string = """
-I told everyone in the world: '''
+I want to tell everyone in the world: ''' \
 
 I love my wife
 
 '''
 
 you should understand what I mean
-Yes, it means ''' I'm not sure what I mean '''
+Yes, it means ''' I love her so so so Much '''
 
 
 """
