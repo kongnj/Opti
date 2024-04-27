@@ -2,138 +2,110 @@ import html
 import tokenize
 import keyword
 import sys
+import io
 
 
-def get_statistics(code):
+def get_statistics(filename):
     # Q1 Number of lines
     def num_of_line(filename):
-        try:
-            with open(filename, 'r') as f:
+        with open(filename, 'r') as f:
                 lines = f.readlines()
-            return len(lines)
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        return len(lines)
 
     # Q2 Maximum line length
     def max_line_length(filename):
-        try:
-            with open(filename, 'r') as f:
-                content = f.read()
-            lines = content.splitlines()
+        with open(filename, 'r') as f:
+            content = f.read()
+        lines = content.splitlines()
+        if len(lines) == 0:
+            return 0
+        else:
             max_length = max(len(line) for line in lines)
             return max_length
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
 
     # Q3 Maximum variable length
     def max_variable_length(filename):
         max_var_length = 0
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                for token in tokens:
-                    if token.type == tokenize.NAME and not keyword.iskeyword(token.string):
-                        max_var_length = max(max_var_length, len(token.string))
-            return max_var_length
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            for token in tokens:
+                if token.type == tokenize.NAME and not keyword.iskeyword(token.string):
+                    max_var_length = max(max_var_length, len(token.string))
+        return max_var_length
 
     # Q4 Minimum variable length
     def min_variable_length(filename):
         variable_lengths = []
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                for token in tokens:
-                    # Check if the token is a NAME and not a Python keyword
-                    if token.type == tokenize.NAME and not keyword.iskeyword(token.string):
-                        variable_lengths.append(len(token.string))
-            return min(variable_lengths)
-        except Exception as e:
-            print(f"Error occurred: {e}")
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            for token in tokens:
+                # Check if the token is a NAME and not a Python keyword
+                if token.type == tokenize.NAME and not keyword.iskeyword(token.string):
+                    variable_lengths.append(len(token.string))
+        # if there is no variable at all inside input file, will return 0
+        if len(variable_lengths) == 0:
             return 0
+        else:
+            return min(variable_lengths)
 
     # Q5 Number of comment lines
     def num_of_cl(filename):
         number_of_comment = 0
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                for token in tokens:
-                    if token.type == tokenize.COMMENT:
-                        number_of_comment += 1
-            return number_of_comment
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            for token in tokens:
+                if token.type == tokenize.COMMENT:
+                    number_of_comment += 1
+        return number_of_comment
 
     # Q6 Number of definitions
     def num_of_def(filename):
-
         number_of_definitions = 0
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                for token in tokens:
-                    if token.type == tokenize.NAME and token.string == 'def':
-                        number_of_definitions += 1
-            return number_of_definitions
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            for token in tokens:
+                if token.type == tokenize.NAME and token.string == 'def':
+                    number_of_definitions += 1
+        return number_of_definitions
 
     # Q7 Number of strings
     def num_of_str(filename):
         number_of_strings = 0
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                for token in tokens:
-                    if token.type == tokenize.STRING:
-                        number_of_strings += 1
-            return number_of_strings
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            for token in tokens:
+                if token.type == tokenize.STRING:
+                    number_of_strings += 1
+        return number_of_strings
 
     # Q8 Number of numbers
     def num_of_num(filename):
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                number_of_numbers = 0
-                for token in tokens:
-                    if token.type == tokenize.NUMBER:
-                        number_of_numbers += 1
-            return number_of_numbers
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            number_of_numbers = 0
+            for token in tokens:
+                if token.type == tokenize.NUMBER:
+                    number_of_numbers += 1
+        return number_of_numbers
 
     # Q9 Number of repeated constants
     def num_of_rc(filename):
-        try:
-            with open(filename, 'rb') as f:
-                tokens = tokenize.tokenize(f.readline)
-                repeat = {}
-                for i in tokens:
-                    if i.type in (tokenize.STRING, tokenize.NUMBER):
-                        j = i.string
-                        if j in repeat:
-                            repeat[j] += 1
-                        else:
-                            repeat[j] = 1
-                repeated_constants = 0
-                for n in repeat.values():
-                    if n > 1:
-                        repeated_constants += 1
-            return repeated_constants
-        except Exception as e:
-            print(f"Error occurred: {e}")
-            return 0
+        with open(filename, 'rb') as f:
+            tokens = tokenize.tokenize(f.readline)
+            repeat = {}
+            for token in tokens:
+                if token.type in (tokenize.STRING, tokenize.NUMBER):
+                    str = token.string
+                    if str in repeat:
+                        repeat[str] += 1
+                    else:
+                        repeat[str] = 1
+            repeated_constants = 0
+            for n in repeat.values():
+                if n > 1:
+                    repeated_constants += 1
+        return repeated_constants
+
 
     statistics = {
         'Number of lines = ': num_of_line(filename),
@@ -152,8 +124,8 @@ def get_statistics(code):
 
 
 def format_code_for_html(filename):
-    with (open(filename, 'r') as file):
-        # We creat a code_book, so if after the tokenize(), the missing item can be found here
+    with (open(filename, 'r', encoding='utf-8') as file):
+        # By creating a code_book, the missing item can be found here after the tokenize()
         code_book = {}
         original_code = file.readlines()
         line_no = 1
@@ -166,7 +138,8 @@ def format_code_for_html(filename):
         new_line = ''  # create an empty string to store the coding with class added
         add_missing = 0
         space_need = 0
-        for token in tokenize.generate_tokens(file.readline):
+        tokens = tokenize.generate_tokens(file.readline)
+        for token in tokens:
             # print(token) # for test purpose only, print all the token
             # print(token.type) # for test purpose only, print all the token type
             # print(token.line) # for test purpose only, print all the token line
@@ -292,20 +265,21 @@ if __name__ == '__main__':
 
     try:
         filename = sys.argv[1]
-        with open(filename, 'r') as file:
+        with open(filename, 'r', encoding='utf-8') as file:
             if not filename.lower().endswith('.py'):
                 print('The file is not a Python file')
                 sys.exit(1)
             code = file.read()
-        stats = get_statistics(code)
+        stats = get_statistics(filename)
         line = str(stats['Number of lines = '])
         formatted_code = format_code_for_html(filename)
         full_html = fill_html_template(stats, formatted_code)
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
         sys.stdout.write(full_html)
         sys.stdout.close()
     except FileNotFoundError:
         print('Error: Can not find this file, please try another file.')
         sys.exit(1)
-    except Exception:
-        print('Ops, something goes wrong')
+    except Exception as e:
+        print(f"Error occurred: {e}")
         sys.exit(1)
