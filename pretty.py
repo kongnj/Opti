@@ -3,6 +3,7 @@ import tokenize
 import keyword
 import sys
 import io
+import datetime
 
 
 def get_statistics(filename):
@@ -202,7 +203,7 @@ def format_code_for_html(filename):
         line = '<span class="line{}">'.format(i) + str(i) + '</span>' + ' ' * (10 - len(str(i))) + line
         i += 1
         final_code += '<br>' + line
-    # Add at the end to allow jump to end
+    # Add at the end to allow jump to end and show when the HTML is created
     final_code += '<span id="end"></span>'
 
     return "<pre><code>" + final_code + "</code></pre>"
@@ -232,12 +233,8 @@ def fill_html_template(stats, formatted_code):
         </head>
         <body>
             <h1>Python code inspector</h1>
-            <span>Current Date and time </span>
-            <div id="datetime">
-                <script>
-                    setInterval("document.getElementById('datetime').innerHTML=new Date().toLocaleString();", 500);
-                </script>
-            </div>
+            <span>This HTML is created on: {datetime} </span><br>
+            <span>The input file name is : {filename}</span>
             <ul>
                 <li><a href="#stats">Statistics</a></li>
                 <li><a href="#code">Code</a></li>
@@ -253,7 +250,7 @@ def fill_html_template(stats, formatted_code):
             </div>
         </body>
     </html>
-    """.format(statistics_html=statistics_html, formatted_code=formatted_code)
+    """.format(filename=filename,datetime=currenttime, statistics_html=statistics_html, formatted_code=formatted_code)
 
     return html_content
 
@@ -272,6 +269,7 @@ if __name__ == '__main__':
             code = file.read()
         stats = get_statistics(filename)
         line = str(stats['Number of lines = '])
+        currenttime = datetime.datetime.now().strftime("%d-%b-%Y %H:%M:%S")
         formatted_code = format_code_for_html(filename)
         full_html = fill_html_template(stats, formatted_code)
         sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
